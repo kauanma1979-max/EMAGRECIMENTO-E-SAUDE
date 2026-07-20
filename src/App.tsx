@@ -15,7 +15,8 @@ import {
   Upload,
   Database,
   Syringe,
-  Pill
+  Pill,
+  Apple
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import ConfigPerfil from "./components/ConfigPerfil";
@@ -25,6 +26,7 @@ import RegistroForm from "./components/RegistroForm";
 import HistoricoTabela from "./components/HistoricoTabela";
 import RastreadorInjecaoCard from "./components/RastreadorInjecaoCard";
 import MedicamentosCard from "./components/MedicamentosCard";
+import PlanoNutricional from "./components/PlanoNutricional";
 import { AppData, AppConfig, Registro, MedicamentoItem } from "./types";
 
 export default function App() {
@@ -217,6 +219,18 @@ export default function App() {
         >
           <LayoutDashboard className="w-4 h-4" />
           <span>Dashboard Principal</span>
+        </button>
+
+        <button
+          onClick={() => { setActiveTab("plano"); setMobileMenuOpen(false); }}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+            activeTab === "plano"
+              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
+              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+          }`}
+        >
+          <Apple className="w-4 h-4" />
+          <span>Plano Nutricional</span>
         </button>
 
         <button
@@ -539,6 +553,14 @@ export default function App() {
                   onUpdateMedicamento={handleUpdateMedicamento}
                   onDeleteMedicamento={handleDeleteMedicamento}
                 />
+              </motion.div>
+            ) : activeTab === "plano" ? (
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-6"
+              >
+                <PlanoNutricional />
               </motion.div>
             ) : (
               <motion.div
