@@ -33,6 +33,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showPerfilModal, setShowPerfilModal] = useState(false);
 
   // Load initial data from localStorage
   const [appData, setAppData] = useState<AppData>(() => {
@@ -258,28 +259,40 @@ export default function App() {
         </button>
 
         <button
-          onClick={() => { setActiveTab("perfil"); setMobileMenuOpen(false); }}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
-            activeTab === "perfil"
-              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-          }`}
+          onClick={() => { setShowPerfilModal(true); setMobileMenuOpen(false); }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer text-slate-400 hover:text-slate-200 hover:bg-slate-800"
         >
           <Settings className="w-4 h-4" />
           <span>Configurar Perfil</span>
         </button>
 
-        {/* Integrated Profile Inputs in the Sidebar */}
-        <div className="pt-6 border-t border-slate-800 mt-6 space-y-4">
+        {/* Profile Card Summary in the Sidebar */}
+        <div className="pt-6 border-t border-slate-800 mt-6 space-y-3">
           <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-3">
-            Atalho do Perfil
+            Seu Perfil
           </div>
-          <div className="px-3">
-            <ConfigPerfil
-              config={appData.config}
-              onChange={handleConfigChange}
-              inSidebar={true}
-            />
+          <div className="mx-3 p-3 bg-slate-850 rounded-xl border border-slate-800 flex items-center gap-3">
+            {appData.config.foto ? (
+              <img
+                src={appData.config.foto}
+                alt="Foto do perfil"
+                className="w-9 h-9 rounded-full object-cover border border-slate-700 shrink-0"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black text-xs shrink-0 uppercase">
+                {appData.config.nome ? appData.config.nome.trim().split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() : "UF"}
+              </div>
+            )}
+            <div className="flex-1 overflow-hidden">
+              <p className="text-xs text-white font-bold truncate">{appData.config.nome || "Usuário Focado"}</p>
+              <button
+                type="button"
+                onClick={() => { setShowPerfilModal(true); setMobileMenuOpen(false); }}
+                className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-wider flex items-center gap-1 mt-0.5 cursor-pointer bg-transparent border-none"
+              >
+                Editar Perfil
+              </button>
+            </div>
           </div>
         </div>
 
@@ -444,10 +457,10 @@ export default function App() {
                 className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm text-indigo-800"
               >
                 <div>
-                  <span className="font-bold">🎯 Defina seu perfil de emagrecimento!</span> Configure seu peso inicial e meta de perda de peso no painel lateral de configurações para liberar todos os indicadores.
+                  <span className="font-bold">🎯 Defina seu perfil de emagrecimento!</span> Abra as configurações de perfil para cadastrar seu peso inicial, foto e meta.
                 </div>
                 <button
-                  onClick={() => setActiveTab("perfil")}
+                  onClick={() => setShowPerfilModal(true)}
                   className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
                 >
                   Configurar Agora
@@ -455,85 +468,7 @@ export default function App() {
               </motion.div>
             )}
 
-            {/* If Mobile Perfil View Active */}
-            {activeTab === "perfil" ? (
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                  <div className="mb-6">
-                    <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Configurações Gerais do Perfil</h2>
-                    <p className="text-sm text-slate-500">Mantenha seu progresso sincronizado atualizando sua meta e peso de partida.</p>
-                  </div>
-                  <ConfigPerfil
-                    config={appData.config}
-                    onChange={handleConfigChange}
-                    inSidebar={false}
-                  />
-                </div>
-
-                {/* Database Backup & Restore Card */}
-                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                      <Database className="w-5 h-5 text-indigo-500" />
-                      Gerenciamento de Dados
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Exporte todos os seus dados e registros de peso para um arquivo JSON seguro ou restaure uma cópia anterior.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Criar Cópia de Segurança</h4>
-                        <p className="text-[11px] text-slate-400 mb-4">Gera um arquivo .json para você guardar no computador ou celular.</p>
-                      </div>
-                      <button
-                        onClick={handleExportBackup}
-                        className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-widest active:scale-95 transition-all cursor-pointer shadow-sm"
-                      >
-                        <Download className="w-4 h-4" />
-                        <span>Fazer Backup JSON</span>
-                      </button>
-                    </div>
-
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Restaurar de um Arquivo</h4>
-                        <p className="text-[11px] text-slate-400 mb-4">Escolha um arquivo backup JSON gerado anteriormente para restaurar.</p>
-                      </div>
-                      <button
-                        onClick={() => document.getElementById("restore-input-main")?.click()}
-                        className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-widest active:scale-95 transition-all cursor-pointer shadow-sm"
-                      >
-                        <Upload className="w-4 h-4" />
-                        <span>Restaurar Backup JSON</span>
-                      </button>
-                      <input
-                        type="file"
-                        id="restore-input-main"
-                        accept=".json"
-                        onChange={handleImportBackup}
-                        className="hidden"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <button
-                    onClick={() => setActiveTab("dashboard")}
-                    className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors cursor-pointer"
-                  >
-                    Voltar ao Dashboard
-                  </button>
-                </div>
-              </motion.div>
-            ) : activeTab === "injecoes" ? (
+            {activeTab === "injecoes" ? (
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -569,6 +504,55 @@ export default function App() {
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
+                {/* Cabeçalho de Perfil do Usuário */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50 rounded-full blur-3xl -z-0 opacity-65" />
+                  <div className="flex flex-col sm:flex-row items-center gap-5 relative z-10 w-full md:w-auto">
+                    {appData.config.foto ? (
+                      <img
+                        src={appData.config.foto}
+                        alt="Foto de perfil"
+                        className="w-20 h-20 rounded-full object-cover border-4 border-slate-100 shadow-md shrink-0"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center font-black text-2xl shrink-0 uppercase shadow-md shadow-indigo-200">
+                        {appData.config.nome ? appData.config.nome.trim().split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() : "UF"}
+                      </div>
+                    )}
+                    <div className="text-center sm:text-left space-y-1">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">
+                          {appData.config.nome || "Usuário Focado"}
+                        </h2>
+                        {appData.config.sexo && (
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">
+                            {appData.config.sexo}
+                          </span>
+                        )}
+                        {appData.config.idade ? (
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-100">
+                            {appData.config.idade} anos
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="text-xs text-slate-400 font-semibold flex items-center justify-center sm:justify-start gap-1.5">
+                        <span>Jornada iniciada em:</span>
+                        <strong className="text-slate-600 font-bold">
+                          {appData.config.dataInicio ? appData.config.dataInicio.split("-").reverse().join("/") : "--/--/----"}
+                        </strong>
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setShowPerfilModal(true)}
+                    className="shrink-0 bg-indigo-50 hover:bg-indigo-100 active:scale-95 text-indigo-600 hover:text-indigo-700 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 border border-indigo-100 cursor-pointer relative z-10 w-full sm:w-auto justify-center"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Configurar Perfil</span>
+                  </button>
+                </div>
+
                 {/* Stats row */}
                 <div className="grid grid-cols-1 gap-6">
                   <DashboardStatus
@@ -596,6 +580,96 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Configurações de Perfil */}
+      <AnimatePresence>
+        {showPerfilModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPerfilModal(false)}
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+              id="perfil-modal-backdrop"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 max-w-2xl w-full relative z-10 max-h-[90vh] flex flex-col"
+              id="perfil-modal-content"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4 shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <Settings className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider">
+                      Configurações do Perfil
+                    </h3>
+                    <p className="text-[10px] text-indigo-500 uppercase font-black tracking-widest mt-0.5">
+                      Atualize seus dados e metas de peso
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPerfilModal(false)}
+                  className="p-1.5 px-3 rounded-lg text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer text-xs font-black uppercase tracking-wider"
+                  id="close-perfil-modal-btn"
+                >
+                  Fechar
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <div className="flex-1 overflow-y-auto pr-1 space-y-6">
+                <ConfigPerfil
+                  config={appData.config}
+                  onChange={handleConfigChange}
+                  inSidebar={false}
+                />
+                
+                {/* Database Backup & Restore in Modal */}
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-150 space-y-3">
+                  <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                    Exportar / Importar Dados do App
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={handleExportBackup}
+                      className="flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-700 font-bold py-2 px-3 rounded-xl text-xs border border-slate-200 transition-all cursor-pointer shadow-sm"
+                    >
+                      <Download className="w-4 h-4 text-indigo-500" />
+                      <span>Backup JSON</span>
+                    </button>
+                    <button
+                      onClick={() => document.getElementById("restore-input-modal")?.click()}
+                      className="flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-700 font-bold py-2 px-3 rounded-xl text-xs border border-slate-200 transition-all cursor-pointer shadow-sm"
+                    >
+                      <Upload className="w-4 h-4 text-indigo-500" />
+                      <span>Restaurar JSON</span>
+                    </button>
+                    <input
+                      type="file"
+                      id="restore-input-modal"
+                      accept=".json"
+                      onChange={handleImportBackup}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
