@@ -43,9 +43,13 @@ export default function App() {
         const parsed = JSON.parse(saved);
         return {
           config: {
-            pesoInicial: parsed.config?.pesoInicial ?? 0,
-            metaPerda: parsed.config?.metaPerda ?? 0,
-            dataInicio: parsed.config?.dataInicio ?? "",
+            pesoInicial: parsed.config?.pesoInicial ?? 80,
+            metaPerda: parsed.config?.metaPerda ?? 10,
+            dataInicio: parsed.config?.dataInicio ?? "2026-06-01",
+            foto: parsed.config?.foto ?? "",
+            nome: parsed.config?.nome ?? "",
+            sexo: parsed.config?.sexo ?? "",
+            idade: parsed.config?.idade !== undefined ? Number(parsed.config.idade) : undefined,
           },
           registros: Array.isArray(parsed.registros) ? parsed.registros : [],
           medicamentos: Array.isArray(parsed.medicamentos) ? parsed.medicamentos : [],
@@ -55,7 +59,15 @@ export default function App() {
       }
     }
     return {
-      config: { pesoInicial: 80, metaPerda: 10, dataInicio: "2026-06-01" },
+      config: {
+        pesoInicial: 80,
+        metaPerda: 10,
+        dataInicio: "2026-06-01",
+        foto: "",
+        nome: "",
+        sexo: "",
+        idade: undefined,
+      },
       registros: [],
       medicamentos: [],
     };
@@ -91,18 +103,30 @@ export default function App() {
         try {
           const parsed = JSON.parse(event.target?.result as string);
           if (parsed && typeof parsed === "object") {
-            const pesoInicial = parseFloat(parsed.config?.pesoInicial) || 0;
-            const metaPerda = parseFloat(parsed.config?.metaPerda) || 0;
-            const dataInicio = parsed.config?.dataInicio || "";
+            const pesoInicial = parseFloat(parsed.config?.pesoInicial) || 80;
+            const metaPerda = parseFloat(parsed.config?.metaPerda) || 10;
+            const dataInicio = parsed.config?.dataInicio || "2026-06-01";
+            const foto = parsed.config?.foto || "";
+            const nome = parsed.config?.nome || "";
+            const sexo = parsed.config?.sexo || "";
+            const idade = parsed.config?.idade !== undefined ? Number(parsed.config.idade) : undefined;
             const registros = Array.isArray(parsed.registros) ? parsed.registros : [];
             const medicamentos = Array.isArray(parsed.medicamentos) ? parsed.medicamentos : [];
             
             setAppData({
-              config: { pesoInicial, metaPerda, dataInicio },
+              config: {
+                pesoInicial,
+                metaPerda,
+                dataInicio,
+                foto,
+                nome,
+                sexo,
+                idade,
+              },
               registros,
               medicamentos
             });
-            alert("✅ Backup restaurado com sucesso!");
+            alert("✅ Backup restaurado com sucesso com todas as fotos e informações de perfil!");
           } else {
             alert("❌ Erro: O arquivo selecionado não possui um formato de backup válido.");
           }
