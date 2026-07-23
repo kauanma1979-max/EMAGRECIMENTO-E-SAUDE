@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import { Scale, Milestone, Flame, CalendarRange } from "lucide-react";
+import { Scale, Milestone, Flame, CalendarRange, Activity } from "lucide-react";
 import { AppConfig, Registro } from "../types";
 
 interface DashboardStatusProps {
@@ -15,11 +15,21 @@ export default function DashboardStatus({ config, registros }: DashboardStatusPr
     
     // Determine current weight (most recent registration date, or initial weight if none)
     let pesoAtual = pesoInicial;
+    let ultimaGlicemia: number | undefined = undefined;
+
     if (registros.length > 0) {
       const sorted = [...registros].sort(
         (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
       );
       pesoAtual = sorted[0].peso;
+
+      const sortedGlicemia = [...registros]
+        .filter((r) => r.glicemia !== undefined && r.glicemia !== null)
+        .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+      
+      if (sortedGlicemia.length > 0) {
+        ultimaGlicemia = sortedGlicemia[0].glicemia;
+      }
     }
 
     const perdido = pesoInicial > 0 ? pesoInicial - pesoAtual : 0;
@@ -42,6 +52,7 @@ export default function DashboardStatus({ config, registros }: DashboardStatusPr
       perdido,
       falta,
       dias,
+      ultimaGlicemia,
     };
   }, [config, registros]);
 
@@ -125,6 +136,16 @@ export default function DashboardStatus({ config, registros }: DashboardStatusPr
       icon: CalendarRange,
       colorClass: "text-purple-600 bg-purple-50 border-purple-100",
       subtextColorClass: "text-slate-500"
+    },
+    {
+      title: "Glicemia / Diabetes",
+      value: stats.ultimaGlicemia !== undefined ? `${stats.ultimaGlicemia} mg/dL` : "-- mg/dL",
+      subtext: stats.ultimaGlicemia !== undefined 
+        ? (stats.ultimaGlicemia >= 126 ? "⚠️ Nível Elevado" : stats.ultimaGlicemia >= 100 ? "⚡ Nível de Atenção" : "✅ Nível Normal") 
+        : "Sem medições registradas",
+      icon: Activity,
+      colorClass: "text-rose-600 bg-rose-50 border-rose-100",
+      subtextColorClass: stats.ultimaGlicemia !== undefined && stats.ultimaGlicemia >= 126 ? "text-rose-600 font-bold" : stats.ultimaGlicemia !== undefined && stats.ultimaGlicemia >= 100 ? "text-amber-600 font-bold" : "text-emerald-600 font-bold"
     }
   ];
 
@@ -222,8 +243,8 @@ export default function DashboardStatus({ config, registros }: DashboardStatusPr
         </div>
       </motion.div>
 
-      {/* Grid containing the 4 classic cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Grid containing the status cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {cards.map((card, i) => (
           <motion.div
             key={card.title}

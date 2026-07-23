@@ -1,5 +1,5 @@
 import { useState, FormEvent, DragEvent, ChangeEvent } from "react";
-import { PlusCircle, Camera, Image as ImageIcon, X, Loader2, Plus } from "lucide-react";
+import { PlusCircle, Camera, Image as ImageIcon, X, Loader2, Plus, Activity } from "lucide-react";
 import { Registro } from "../types";
 
 interface RegistroFormProps {
@@ -59,6 +59,7 @@ export default function RegistroForm({ onAddRegistro }: RegistroFormProps) {
 
   const [data, setData] = useState(getTodayString());
   const [peso, setPeso] = useState("");
+  const [glicemia, setGlicemia] = useState("");
   const [fome, setFome] = useState(5);
   const [obs, setObs] = useState("");
   const [fotos, setFotos] = useState<string[]>([]);
@@ -122,6 +123,7 @@ export default function RegistroForm({ onAddRegistro }: RegistroFormProps) {
       data,
       peso: parseFloat(peso),
       fome,
+      glicemia: glicemia ? parseFloat(glicemia) : undefined,
       obs,
       foto: fotos[0] || undefined, // First photo for single-image backwards compatibility
       fotos: fotos.length > 0 ? fotos : undefined,
@@ -129,6 +131,7 @@ export default function RegistroForm({ onAddRegistro }: RegistroFormProps) {
 
     // Reset fields
     setPeso("");
+    setGlicemia("");
     setFome(5);
     setObs("");
     setFotos([]);
@@ -142,7 +145,7 @@ export default function RegistroForm({ onAddRegistro }: RegistroFormProps) {
         Novo Registro
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
               Data
@@ -168,6 +171,30 @@ export default function RegistroForm({ onAddRegistro }: RegistroFormProps) {
               placeholder="0.0"
               className="mt-1.5 block w-full rounded-lg border-slate-200 p-2 border text-sm font-bold text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
             />
+          </div>
+        </div>
+
+        {/* Diabetes / Glicemia Field */}
+        <div>
+          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-between">
+            <span className="flex items-center gap-1">
+              <Activity className="w-3.5 h-3.5 text-rose-500" />
+              Glicemia / Diabetes (mg/dL)
+            </span>
+            <span className="text-[9px] text-slate-400 font-normal">Opcional</span>
+          </label>
+          <div className="relative mt-1.5">
+            <input
+              type="number"
+              step="1"
+              value={glicemia}
+              onChange={(e) => setGlicemia(e.target.value)}
+              placeholder="Ex: 95 mg/dL"
+              className="block w-full rounded-lg border-slate-200 p-2 pr-16 border text-sm font-bold text-slate-700 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all"
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-xs font-bold text-slate-400">
+              mg/dL
+            </div>
           </div>
         </div>
 

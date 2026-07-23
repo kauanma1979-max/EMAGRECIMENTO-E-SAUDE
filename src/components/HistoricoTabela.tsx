@@ -12,7 +12,8 @@ import {
   ChevronRight,
   ImageIcon,
   Edit2,
-  Loader2
+  Loader2,
+  Activity
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Registro } from "../types";
@@ -35,6 +36,7 @@ export default function HistoricoTabela({
   const [editingReg, setEditingReg] = useState<Registro | null>(null);
   const [editData, setEditData] = useState("");
   const [editPeso, setEditPeso] = useState("");
+  const [editGlicemia, setEditGlicemia] = useState("");
   const [editFome, setEditFome] = useState(5);
   const [editObs, setEditObs] = useState("");
   const [editFotos, setEditFotos] = useState<string[]>([]);
@@ -86,6 +88,7 @@ export default function HistoricoTabela({
     setEditingReg(reg);
     setEditData(reg.data);
     setEditPeso(reg.peso.toString());
+    setEditGlicemia(reg.glicemia !== undefined ? reg.glicemia.toString() : "");
     setEditFome(reg.fome);
     setEditObs(reg.obs || "");
     const initialFotos = reg.fotos && reg.fotos.length > 0
@@ -129,6 +132,7 @@ export default function HistoricoTabela({
       ...editingReg,
       data: editData,
       peso: parseFloat(editPeso),
+      glicemia: editGlicemia ? parseFloat(editGlicemia) : undefined,
       fome: editFome,
       obs: editObs,
       foto: editFotos[0] || undefined,
@@ -213,6 +217,7 @@ export default function HistoricoTabela({
               <th className="px-6 py-3">Fotos</th>
               <th className="px-6 py-3">Data</th>
               <th className="px-6 py-3">Peso</th>
+              <th className="px-6 py-3">Glicemia</th>
               <th className="px-6 py-3">Nível Fome</th>
               <th className="px-6 py-3">Obs.</th>
               <th className="px-6 py-3 text-center">Ações</th>
@@ -222,7 +227,7 @@ export default function HistoricoTabela({
             {sortedRegistros.length === 0 ? (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="px-6 py-12 text-center text-sm text-slate-400 font-medium"
                 >
                   Nenhum registro encontrado. Comece adicionando um ao lado!
@@ -281,6 +286,16 @@ export default function HistoricoTabela({
                     </td>
                     <td className="px-6 py-4 text-sm font-black text-slate-800">
                       {reg.peso.toFixed(1)} kg
+                    </td>
+                    <td className="px-6 py-4 text-xs font-bold text-slate-700">
+                      {reg.glicemia !== undefined && reg.glicemia !== null ? (
+                        <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 px-2.5 py-1 rounded-lg font-black border border-rose-100/80 shadow-2xs">
+                          <Activity className="w-3.5 h-3.5 text-rose-500" />
+                          {reg.glicemia} <span className="text-[9px] text-rose-400 font-bold">mg/dL</span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-300 font-medium">---</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -449,8 +464,8 @@ export default function HistoricoTabela({
                     </button>
                   </div>
 
-                  {/* Weight and Date quick highlights */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
+                  {/* Weight, Date, and Glicemia quick highlights */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
                     <div className="bg-indigo-50/50 rounded-2xl p-3 border border-indigo-100 flex items-center gap-3">
                       <div className="p-2 bg-indigo-500 rounded-xl text-white">
                         <Scale className="w-5 h-5" />
@@ -470,6 +485,18 @@ export default function HistoricoTabela({
                         <p className="text-xs font-black text-slate-700">{formatDate(activeReg.data)}</p>
                       </div>
                     </div>
+
+                    {activeReg.glicemia !== undefined && (
+                      <div className="bg-rose-50/50 rounded-2xl p-3 border border-rose-100 flex items-center gap-3 col-span-2 md:col-span-1">
+                        <div className="p-2 bg-rose-500 rounded-xl text-white">
+                          <Activity className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Glicemia</p>
+                          <p className="text-base font-black text-rose-600">{activeReg.glicemia} mg/dL</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Hunger stats inside modal */}
@@ -574,6 +601,29 @@ export default function HistoricoTabela({
                       onChange={(e) => setEditPeso(e.target.value)}
                       className="w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 p-2 border font-bold text-slate-700 outline-none transition-all text-sm"
                     />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center justify-between">
+                    <span className="flex items-center gap-1">
+                      <Activity className="w-3.5 h-3.5 text-rose-500" />
+                      Glicemia / Diabetes (mg/dL)
+                    </span>
+                    <span className="text-[9px] text-slate-400 font-normal">Opcional</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="1"
+                      placeholder="Ex: 95 mg/dL"
+                      value={editGlicemia}
+                      onChange={(e) => setEditGlicemia(e.target.value)}
+                      className="w-full rounded-lg border-slate-200 focus:border-rose-500 focus:ring-rose-500 p-2 border font-bold text-slate-700 outline-none transition-all text-sm pr-16"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-xs font-bold text-slate-400">
+                      mg/dL
+                    </div>
                   </div>
                 </div>
 

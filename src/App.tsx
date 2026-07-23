@@ -34,6 +34,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
   const [showPerfilModal, setShowPerfilModal] = useState(false);
+  const [showRegistroModal, setShowRegistroModal] = useState(false);
 
   // Load initial data from localStorage
   const [appData, setAppData] = useState<AppData>(() => {
@@ -451,15 +452,7 @@ export default function App() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => {
-                setActiveTab("dashboard");
-                const element = document.getElementById("registro-form-card");
-                if (element) {
-                  element.scrollIntoView({ behavior: "smooth", block: "center" });
-                  element.classList.add("ring-2", "ring-indigo-500");
-                  setTimeout(() => {
-                    element.classList.remove("ring-2", "ring-indigo-500");
-                  }, 1500);
-                }
+                setShowRegistroModal(true);
               }}
               className="bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white px-4 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
             >
@@ -690,6 +683,61 @@ export default function App() {
                   </div>
                 </div>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* Modal Novo Registro */}
+      <AnimatePresence>
+        {showRegistroModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowRegistroModal(false)}
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+              id="registro-modal-backdrop"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 max-w-lg w-full relative z-10 max-h-[90vh] flex flex-col overflow-y-auto custom-scrollbar"
+              id="registro-modal-content"
+            >
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <PlusCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider">
+                      Novo Registro
+                    </h3>
+                    <p className="text-[10px] text-indigo-500 uppercase font-black tracking-widest mt-0.5">
+                      Registre peso, glicemia/diabetes, fome e fotos
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowRegistroModal(false)}
+                  className="p-1.5 px-3 rounded-lg text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer text-xs font-black uppercase tracking-wider"
+                >
+                  Fechar
+                </button>
+              </div>
+
+              <RegistroForm
+                onAddRegistro={(newReg) => {
+                  handleAddRegistro(newReg);
+                  setShowRegistroModal(false);
+                }}
+              />
             </motion.div>
           </div>
         )}

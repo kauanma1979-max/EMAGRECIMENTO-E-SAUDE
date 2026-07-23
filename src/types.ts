@@ -13,6 +13,7 @@ export interface Registro {
   data: string; // YYYY-MM-DD
   peso: number;
   fome: number; // 0-10
+  glicemia?: number; // Diabetes / Glicemia (mg/dL)
   obs: string;
   foto?: string; // Base64 encoded string of user uploaded photo
   fotos?: string[]; // Array of Base64 encoded strings
