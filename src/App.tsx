@@ -16,7 +16,9 @@ import {
   Database,
   Syringe,
   Pill,
-  Apple
+  Apple,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import ConfigPerfil from "./components/ConfigPerfil";
@@ -31,6 +33,7 @@ import { AppData, AppConfig, Registro, MedicamentoItem } from "./types";
 
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
   const [showPerfilModal, setShowPerfilModal] = useState(false);
@@ -219,14 +222,23 @@ export default function App() {
   const sidebarContent = (
     <div className="flex flex-col h-full bg-slate-900 text-slate-300">
       {/* Brand Header */}
-      <div className="p-6 flex items-center gap-3 border-b border-slate-800">
-        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
-          <Dumbbell className="w-4 h-4 text-white" />
+      <div className="p-6 flex items-center justify-between border-b border-slate-800">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
+            <Dumbbell className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <span className="text-white font-extrabold text-lg tracking-tight block">EMAGRECER.IO</span>
+            <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block -mt-1">PROJETO SAUDÁVEL</span>
+          </div>
         </div>
-        <div>
-          <span className="text-white font-extrabold text-lg tracking-tight block">EMAGRECER.IO</span>
-          <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block -mt-1">PROJETO SAUDÁVEL</span>
-        </div>
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="hidden lg:flex p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all cursor-pointer group shrink-0"
+          title="Ocultar Painel Lateral (Melhorar visão)"
+        >
+          <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
+        </button>
       </div>
 
       {/* Main Navigation links */}
@@ -382,10 +394,22 @@ export default function App() {
 
   return (
     <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
-      {/* Desktop Sidebar (Permanent) */}
-      <aside className="hidden lg:flex w-64 bg-slate-900 border-r border-slate-800 flex-col shrink-0">
-        {sidebarContent}
-      </aside>
+      {/* Desktop Sidebar (Collapsible with slide animation) */}
+      <AnimatePresence initial={false}>
+        {sidebarOpen && (
+          <motion.aside
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 256, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ type: "spring", bounce: 0, duration: 0.25 }}
+            className="hidden lg:flex bg-slate-900 border-r border-slate-800 flex-col shrink-0 overflow-hidden"
+          >
+            <div className="w-64 h-full flex flex-col">
+              {sidebarContent}
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       {/* Mobile Drawer (Collapsible) */}
       <AnimatePresence>
@@ -425,7 +449,7 @@ export default function App() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Header Command Bar */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {/* Mobile menu trigger */}
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -433,6 +457,18 @@ export default function App() {
             >
               <Menu className="w-6 h-6" />
             </button>
+
+            {/* Desktop trigger to re-open sidebar when hidden */}
+            {!sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all font-black text-xs cursor-pointer shadow-2xs group"
+                title="Mostrar Painel Lateral (EMAGRECER.IO)"
+              >
+                <ChevronRight className="w-4 h-4 text-indigo-600 transition-transform group-hover:translate-x-0.5" />
+                <span className="text-slate-800 font-black">EMAGRECER.IO</span>
+              </button>
+            )}
             
             {/* Search inputs */}
             <div className="relative w-48 md:w-80">
