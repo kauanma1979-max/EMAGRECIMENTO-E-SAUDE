@@ -1,15 +1,17 @@
 import { useMemo } from "react";
-import { User, Calendar, Settings, Syringe, Award, Scale, Sparkles, Camera } from "lucide-react";
-import { AppConfig } from "../types";
+import { User, Calendar, Settings, Syringe, Award, Scale, Camera, Target } from "lucide-react";
+import { AppConfig, Registro } from "../types";
 import { getScheduleStatusForDate } from "./RastreadorInjecaoCard";
 
 interface PerfilCardDashboardProps {
   config: AppConfig;
+  registros?: Registro[];
   onOpenConfigModal: () => void;
 }
 
 export default function PerfilCardDashboard({
   config,
+  registros = [],
   onOpenConfigModal,
 }: PerfilCardDashboardProps) {
   // Get today's injection schedule status (correlating date with Tirzepatida / Retatrutida)
@@ -26,6 +28,15 @@ export default function PerfilCardDashboard({
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   }, [config.dataInicio]);
+
+  // Calculate current weight from the latest registration date
+  const pesoAtual = useMemo(() => {
+    if (!registros || registros.length === 0) return config.pesoInicial || null;
+    const sorted = [...registros].sort(
+      (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
+    );
+    return sorted[0].peso;
+  }, [registros, config.pesoInicial]);
 
   const metaFinalPeso = useMemo(() => {
     if (config.pesoInicial && config.metaPerda) {
@@ -72,13 +83,9 @@ export default function PerfilCardDashboard({
               </div>
             )}
             
-            {/* Edit overlay icon */}
+            {/* Edit overlay on hover */}
             <div className="absolute inset-0 bg-slate-900/40 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white backdrop-blur-[2px]">
               <Camera className="w-6 h-6" />
-            </div>
-
-            <div className="absolute -bottom-1 -right-1 bg-indigo-600 text-white p-2 rounded-xl shadow-md border-2 border-white">
-              <Sparkles className="w-4 h-4" />
             </div>
           </div>
 
@@ -206,12 +213,12 @@ export default function PerfilCardDashboard({
           </div>
         </div>
 
-        {/* Box 2: Peso Inicial & Meta */}
+        {/* Box 2: Peso Inicial & Peso Atual */}
         <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
               <Scale className="w-3.5 h-3.5 text-indigo-500" />
-              Meta & Peso Inicial
+              Peso Inicial & Atual
             </span>
             <Award className="w-4 h-4 text-amber-500" />
           </div>
@@ -224,37 +231,39 @@ export default function PerfilCardDashboard({
               </span>
             </div>
 
-            <div className="bg-white p-2 rounded-xl border border-slate-100">
-              <span className="text-[9px] font-black text-slate-400 uppercase block">Meta de Perda</span>
-              <span className="text-base font-black text-emerald-600">
-                {config.metaPerda ? `-${config.metaPerda} kg` : "--"}
+            <div className="bg-white p-2 rounded-xl border border-indigo-100/80 bg-indigo-50/30">
+              <span className="text-[9px] font-black text-indigo-500 uppercase block">Peso Atual</span>
+              <span className="text-base font-black text-indigo-600">
+                {pesoAtual !== null ? `${pesoAtual.toFixed(1)} kg` : "--"}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Box 3: Meta Final Projetada */}
+        {/* Box 3: Meta Alvo Projetada & Meta de Perda */}
         <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
-              🎯 Meta Alvo Projetada
+              <Target className="w-3.5 h-3.5 text-indigo-500" />
+              Meta Alvo Projetada
             </span>
             <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
               Objetivo
             </span>
           </div>
 
-          <div className="bg-white p-2.5 rounded-xl border border-slate-100 flex items-center justify-between">
-            <div>
-              <span className="text-[10px] text-slate-400 font-bold block">Peso Alvo Final</span>
-              <span className="text-lg font-black text-indigo-600">
-                {metaFinalPeso ? `${metaFinalPeso} kg` : "Não definido"}
+          <div className="grid grid-cols-2 gap-2 text-center">
+            <div className="bg-white p-2 rounded-xl border border-slate-100">
+              <span className="text-[9px] font-black text-slate-400 uppercase block">Peso Alvo Final</span>
+              <span className="text-base font-black text-indigo-600">
+                {metaFinalPeso ? `${metaFinalPeso} kg` : "--"}
               </span>
             </div>
-            <div className="text-right">
-              <span className="text-[9px] font-black text-slate-400 uppercase block">Jornada</span>
-              <span className="text-xs font-black text-slate-700">
-                {diasJornada !== null ? `${diasJornada} dias ativos` : "--"}
+
+            <div className="bg-white p-2 rounded-xl border border-emerald-100/80 bg-emerald-50/30">
+              <span className="text-[9px] font-black text-emerald-600 uppercase block">Meta de Perda</span>
+              <span className="text-base font-black text-emerald-600">
+                {config.metaPerda ? `-${config.metaPerda} kg` : "--"}
               </span>
             </div>
           </div>

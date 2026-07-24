@@ -561,6 +561,7 @@ export default function App() {
                 {/* Cabeçalho de Perfil do Usuário */}
                 <PerfilCardDashboard
                   config={appData.config}
+                  registros={appData.registros}
                   onOpenConfigModal={() => setShowPerfilModal(true)}
                 />
 
