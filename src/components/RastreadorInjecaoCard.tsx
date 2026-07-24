@@ -13,7 +13,7 @@ export interface ScheduleItem {
   monthGroup: string;
 }
 
-const SCHEDULE_DATA: Omit<ScheduleItem, "id">[] = [
+export const SCHEDULE_DATA: Omit<ScheduleItem, "id">[] = [
   // MÊS 1: JULHO/AGOSTO 2026
   { dateStr: "16/07/2026", isoDate: "2026-07-16", dayOfWeek: "Quinta", medication: "Tirzepatida", mainArea: "Abdômen Esquerdo", microArea: "Lado esquerdo do umbigo, parte superior", monthGroup: "📅 MÊS 1: JULHO/AGOSTO 2026" },
   { dateStr: "20/07/2026", isoDate: "2026-07-20", dayOfWeek: "Segunda", medication: "Retatrutida", mainArea: "Braço Direito", microArea: "Terço superior, parte externa (trás do braço)", monthGroup: "📅 MÊS 1: JULHO/AGOSTO 2026" },
@@ -80,6 +80,73 @@ const SCHEDULE_DATA: Omit<ScheduleItem, "id">[] = [
   { dateStr: "14/01/2027", isoDate: "2027-01-14", dayOfWeek: "Quinta", medication: "Tirzepatida", mainArea: "Coxa Esquerda", microArea: "Terço superior, parte frontal (2ª volta)", monthGroup: "📅 MÊS 6: JANEIRO 2027" },
   { dateStr: "18/01/2027", isoDate: "2027-01-18", dayOfWeek: "Segunda", medication: "Retatrutida", mainArea: "Abdômen Direito", microArea: "Lado direito do umbigo, parte superior (2ª volta)", monthGroup: "📅 MÊS 6: JANEIRO 2027" },
 ];
+
+export function getScheduleStatusForDate(targetIsoDate?: string) {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  const currentDateStr = targetIsoDate || `${year}-${month}-${day}`;
+
+  const todaySchedule = SCHEDULE_DATA.find((item) => item.isoDate === currentDateStr);
+
+  if (todaySchedule) {
+    const idx = SCHEDULE_DATA.findIndex((item) => item.isoDate === currentDateStr);
+    let dosage = 2.5;
+    if (todaySchedule.medication === "Retatrutida") {
+      let retatrutidaCount = 0;
+      for (let i = 0; i <= idx; i++) {
+        if (SCHEDULE_DATA[i].medication === "Retatrutida") {
+          if (i === idx) break;
+          retatrutidaCount++;
+        }
+      }
+      if (retatrutidaCount < 4) dosage = 1.0;
+      else if (retatrutidaCount < 8) dosage = 1.5;
+      else if (retatrutidaCount < 12) dosage = 2.0;
+      else dosage = 2.4;
+    }
+    return {
+      isToday: true,
+      medication: todaySchedule.medication,
+      dosage: `${dosage.toFixed(1).replace(".", ",")} mg`,
+      mainArea: todaySchedule.mainArea,
+      microArea: todaySchedule.microArea,
+      dateStr: todaySchedule.dateStr,
+      dayOfWeek: todaySchedule.dayOfWeek,
+    };
+  }
+
+  // Find next upcoming injection
+  const upcoming = SCHEDULE_DATA.find((item) => item.isoDate > currentDateStr);
+  if (upcoming) {
+    const idx = SCHEDULE_DATA.findIndex((item) => item.isoDate === upcoming.isoDate);
+    let dosage = 2.5;
+    if (upcoming.medication === "Retatrutida") {
+      let retatrutidaCount = 0;
+      for (let i = 0; i <= idx; i++) {
+        if (SCHEDULE_DATA[i].medication === "Retatrutida") {
+          if (i === idx) break;
+          retatrutidaCount++;
+        }
+      }
+      if (retatrutidaCount < 4) dosage = 1.0;
+      else if (retatrutidaCount < 8) dosage = 1.5;
+      else if (retatrutidaCount < 12) dosage = 2.0;
+      else dosage = 2.4;
+    }
+    return {
+      isToday: false,
+      nextMedication: upcoming.medication,
+      nextDosage: `${dosage.toFixed(1).replace(".", ",")} mg`,
+      nextDateStr: upcoming.dateStr,
+      nextDayOfWeek: upcoming.dayOfWeek,
+      nextMainArea: upcoming.mainArea,
+    };
+  }
+
+  return { isToday: false };
+}
 
 export default function RastreadorInjecaoCard() {
   const [completedIds, setCompletedIds] = useState<string[]>(() => {

@@ -23,6 +23,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import ConfigPerfil from "./components/ConfigPerfil";
 import DashboardStatus from "./components/DashboardStatus";
+import PerfilCardDashboard from "./components/PerfilCardDashboard";
 import GraficosDashboard from "./components/GraficosDashboard";
 import RegistroForm from "./components/RegistroForm";
 import HistoricoTabela from "./components/HistoricoTabela";
@@ -558,53 +559,10 @@ export default function App() {
                 className="space-y-6"
               >
                 {/* Cabeçalho de Perfil do Usuário */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50 rounded-full blur-3xl -z-0 opacity-65" />
-                  <div className="flex flex-col sm:flex-row items-center gap-5 relative z-10 w-full md:w-auto">
-                    {appData.config.foto ? (
-                      <img
-                        src={appData.config.foto}
-                        alt="Foto de perfil"
-                        className="w-20 h-20 rounded-full object-cover border-4 border-slate-100 shadow-md shrink-0"
-                      />
-                    ) : (
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center font-black text-2xl shrink-0 uppercase shadow-md shadow-indigo-200">
-                        {appData.config.nome ? appData.config.nome.trim().split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() : "UF"}
-                      </div>
-                    )}
-                    <div className="text-center sm:text-left space-y-1">
-                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                        <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">
-                          {appData.config.nome || "Usuário Focado"}
-                        </h2>
-                        {appData.config.sexo && (
-                          <span className="text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">
-                            {appData.config.sexo}
-                          </span>
-                        )}
-                        {appData.config.idade ? (
-                          <span className="text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-100">
-                            {appData.config.idade} anos
-                          </span>
-                        ) : null}
-                      </div>
-                      <p className="text-xs text-slate-400 font-semibold flex items-center justify-center sm:justify-start gap-1.5">
-                        <span>Jornada iniciada em:</span>
-                        <strong className="text-slate-600 font-bold">
-                          {appData.config.dataInicio ? appData.config.dataInicio.split("-").reverse().join("/") : "--/--/----"}
-                        </strong>
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setShowPerfilModal(true)}
-                    className="shrink-0 bg-indigo-50 hover:bg-indigo-100 active:scale-95 text-indigo-600 hover:text-indigo-700 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 border border-indigo-100 cursor-pointer relative z-10 w-full sm:w-auto justify-center"
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span>Configurar Perfil</span>
-                  </button>
-                </div>
+                <PerfilCardDashboard
+                  config={appData.config}
+                  onOpenConfigModal={() => setShowPerfilModal(true)}
+                />
 
                 {/* Stats row */}
                 <div className="grid grid-cols-1 gap-6">
